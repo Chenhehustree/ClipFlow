@@ -37,44 +37,52 @@
             background: #d4d4d8;
         }
 
-        /* Text Clamping for Collapse */
+        /* Text Clamping */
         .text-clamped {
             display: -webkit-box;
-            -webkit-line-clamp: 4; /* Show max 4 lines */
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
         
-        /* Custom Input Focus Ring Animation */
+        /* Animation Utilities */
         .focus-ring-anim {
             transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
-
-        /* Smooth layout transitions */
         .grid-item-transition {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        /* Input Height Transition */
         #input-text {
             transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-
-        /* Custom Styles for Editing State */
         .editing-mode {
-            background-color: #f0fdf4 !important; /* Tailwind: bg-emerald-50 */
-            border-color: #d1fae5 !important; /* Tailwind: border-emerald-200 */
+            background-color: #f0fdf4 !important; /* bg-emerald-50 */
+            border-color: #d1fae5 !important; /* border-emerald-200 */
+        }
+        .height-btn-active {
+            background-color: #f4f4f5;
+            color: #18181b;
+            border-color: #e4e4e7;
+        }
+
+        /* Tag Styles */
+        .tag-pill {
+            transition: all 0.2s;
+        }
+        .tag-checkbox:checked + div {
+            background-color: #18181b; /* zinc-900 */
+            color: white;
+            border-color: #18181b;
         }
         
-        /* Active state for height buttons */
-        .height-btn-active {
-            background-color: #f4f4f5; /* zinc-100 */
-            color: #18181b; /* zinc-900 */
-            border-color: #e4e4e7; /* zinc-200 */
+        /* Mobile Safety */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
         }
     </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8">
+<body class="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8" onclick="closeDropdowns(event)">
 
     <!-- Header & Input Section -->
     <div class="w-full max-w-7xl space-y-8 mb-10">
@@ -92,21 +100,28 @@
 
         <div class="relative group">
             <div class="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-700"></div>
-                <div id="input-container" class="relative bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-300 focus-ring-anim transition-shadow hover:shadow-md transition-all duration-300">
+                <div id="input-container" class="relative bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-visible focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-300 focus-ring-anim transition-all duration-300 z-20">
                 <textarea 
                     id="input-text" 
-                    placeholder="Paste or type your content here..." class="w-full h-32 p-6 resize-none outline-none text-base text-zinc-700 placeholder:text-zinc-400 bg-transparent leading-relaxed font-mono"
+                    placeholder="Paste or type your content here..." class="w-full h-32 p-6 resize-none outline-none text-base text-zinc-700 placeholder:text-zinc-400 bg-transparent leading-relaxed font-mono rounded-t-2xl"
                 ></textarea>
-                <div class="flex flex-wrap items-center justify-between px-5 py-3 border-t border-zinc-50 bg-zinc-50/80 gap-3">
+                
+                <!-- Input Toolbar -->
+                <div class="flex flex-wrap items-center justify-between px-5 py-3 border-t border-zinc-50 bg-zinc-50/80 rounded-b-2xl gap-3">
                     <div class="flex items-center gap-4 flex-wrap">
                         
-                        <!-- Category Selector -->
-                        <div class="relative flex items-center group/cat">
-                            <i data-lucide="tag" class="w-3.5 h-3.5 text-zinc-400 absolute left-2 pointer-events-none"></i>
-                            <select id="new-note-category" class="pl-7 pr-8 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0 cursor-pointer appearance-none transition-colors hover:border-zinc-300">
+                        <!-- Multi-Select Category Dropdown -->
+                        <div class="relative" id="tag-dropdown-container">
+                            <button onclick="toggleTagDropdown(event)" id="tag-dropdown-btn" class="flex items-center gap-2 pl-2.5 pr-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 transition-colors focus:outline-none">
+                                <i data-lucide="tags" class="w-3.5 h-3.5 text-zinc-400"></i>
+                                <span id="selected-tags-label">Select Tags</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-zinc-300 ml-1"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="tag-dropdown-menu" class="hidden absolute bottom-full left-0 mb-2 w-48 bg-white border border-zinc-200 rounded-xl shadow-xl p-2 z-50 flex flex-col gap-1 max-h-60 overflow-y-auto">
                                 <!-- Populated by JS -->
-                            </select>
-                            <i data-lucide="chevron-down" class="w-3 h-3 text-zinc-400 absolute right-2 pointer-events-none"></i>
+                            </div>
                         </div>
 
                         <!-- Height Controls -->
@@ -138,7 +153,7 @@
         </div>
     </div>
 
-    <!-- Category Filter Bar: Changed to flex-wrap -->
+    <!-- Category Filter Bar (Multi-Select) -->
     <div class="w-full max-w-7xl mb-8">
         <div class="flex flex-wrap items-center gap-2 pb-2" id="category-filter-container">
             <!-- Populated by JS -->
@@ -149,61 +164,77 @@
     <div id="notes-container" class="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 items-start">
     </div>
 
+    <!-- Empty State -->
     <div id="empty-state" class="hidden flex-col items-center justify-center py-24 text-center space-y-5">
         <div class="w-16 h-16 bg-white border border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-300 shadow-sm">
-            <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+            <i data-lucide="filter-x" class="w-8 h-8"></i>
         </div>
         <div>
-            <h3 class="text-lg font-medium tracking-tight text-zinc-900">No clips found</h3>
-            <p class="text-sm text-zinc-500 mt-2 max-w-xs mx-auto leading-relaxed">Adjust filters or add a new note to get started.</p>
+            <h3 class="text-lg font-medium tracking-tight text-zinc-900">No matches found</h3>
+            <p class="text-sm text-zinc-500 mt-2 max-w-xs mx-auto leading-relaxed">Try adjusting your filters or search terms.</p>
         </div>
     </div>
 
     <!-- Add Category Modal -->
     <dialog id="add-category-dialog" class="p-0 rounded-xl shadow-xl backdrop:bg-zinc-900/20 border border-zinc-200 bg-white">
         <div class="w-80 p-6">
-            <h3 class="text-lg font-medium text-zinc-900 mb-4">New Category</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-zinc-900">New Category</h3>
+                <button onclick="document.getElementById('add-category-dialog').close()" class="text-zinc-400 hover:text-zinc-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
             <input type="text" id="new-category-input" placeholder="e.g., Vocabulary" class="w-full px-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 mb-4">
             <div class="flex justify-end gap-2">
                 <button onclick="document.getElementById('add-category-dialog').close()" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors">Cancel</button>
-                <button onclick="confirmAddCategory()" class="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">Add</button>
+                <button onclick="confirmAddCategory()" class="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">Add Category</button>
             </div>
         </div>
     </dialog>
 
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-5 py-3 bg-zinc-900 text-white rounded-full shadow-xl transform translate-y-24 opacity-0 transition-all duration-400 z-50">
-        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-        <span class="text-sm font-medium" id="toast-message">Action successful</span>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 px-5 py-3 bg-zinc-900 text-white rounded-full shadow-2xl transform translate-y-32 opacity-0 transition-all duration-300 z-50 hover:scale-105">
+        <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-zinc-400" id="toast-icon"></i>
+            <span class="text-sm font-medium" id="toast-message">Notification</span>
+        </div>
+        <button id="undo-btn" onclick="undoAction()" class="hidden text-xs font-semibold text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors">
+            Undo
+        </button>
     </div>
 
     <script>
-        const STORAGE_KEY = 'clipflow_notes_v2';
-        const CAT_STORAGE_KEY = 'clipflow_categories';
+        const STORAGE_KEY = 'clipflow_notes_v3';
+        const CAT_STORAGE_KEY = 'clipflow_categories_v2';
 
         // Default Data
-        const defaultCategories = ['All', 'Work', 'Code', 'Ideas', 'ToDo', 'Links', 'Snippets'];
+        const defaultCategories = ['Work', 'Code', 'Ideas', 'ToDo', 'Links', 'Personal'];
         const defaultNotes = [
             {
                 id: 1,
-                content: "Tailwind CSS is a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design.",
+                content: "Tailwind CSS is a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90.",
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 expanded: false,
-                category: 'Code'
+                categories: ['Code', 'Work']
             },
             {
                 id: 2,
-                content: "Design is not just what it looks like and feels like. Design is how it works. - Steve Jobs.",
+                content: "Design is not just what it looks like and feels like. Design is how it works.",
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 expanded: false,
-                category: 'Ideas'
+                categories: ['Ideas']
             }
         ];
 
         // State Management
         let notes = loadNotes();
         let categories = loadCategories();
-        let activeFilter = 'All';
+        let activeFilters = []; // Empty array = 'All' behavior
         let editingNoteId = null;
+        let selectedInputTags = [];
+        
+        let lastDeletedNote = null;
+        let lastDeletedIndex = -1;
 
         // DOM Elements
         const container = document.getElementById('notes-container');
@@ -212,21 +243,22 @@
         const countDisplay = document.getElementById('count-display');
         const toast = document.getElementById('toast');
         const toastMsg = document.getElementById('toast-message');
+        const undoBtn = document.getElementById('undo-btn');
         const inputContainer = document.getElementById('input-container');
         const addUpdateText = document.getElementById('add-update-text');
         const categoryFilterContainer = document.getElementById('category-filter-container');
-        const newNoteCategorySelect = document.getElementById('new-note-category');
-
-        // Input Height Buttons
-        const btnSmall = document.getElementById('btn-h-small');
-        const btnMedium = document.getElementById('btn-h-medium');
-        const btnLarge = document.getElementById('btn-h-large');
-
+        const tagDropdownMenu = document.getElementById('tag-dropdown-menu');
+        const selectedTagsLabel = document.getElementById('selected-tags-label');
+        
         // --- Persistence ---
         function loadNotes() {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
-                return stored ? JSON.parse(stored) : defaultNotes;
+                let loaded = stored ? JSON.parse(stored) : defaultNotes;
+                return loaded.map(n => ({
+                    ...n,
+                    categories: Array.isArray(n.categories) ? n.categories : (n.category ? [n.category] : [])
+                }));
             } catch (e) { return defaultNotes; }
         }
 
@@ -245,104 +277,150 @@
             localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(categories));
         }
 
-        // --- UI Control: Input Height ---
+        // --- UI Control ---
         function setInputHeight(size) {
-            // Reset buttons
-            [btnSmall, btnMedium, btnLarge].forEach(btn => btn.classList.remove('height-btn-active'));
-            
-            // Remove previous height classes
+            const btns = ['small', 'medium', 'large'];
+            btns.forEach(b => document.getElementById(`btn-h-${b}`).classList.remove('height-btn-active'));
             input.classList.remove('h-32', 'h-64', 'h-96');
+            
+            document.getElementById(`btn-h-${size}`).classList.add('height-btn-active');
+            const hClass = size === 'small' ? 'h-32' : size === 'medium' ? 'h-64' : 'h-96';
+            input.classList.add(hClass);
+        }
 
-            if (size === 'small') {
-                input.classList.add('h-32');
-                btnSmall.classList.add('height-btn-active');
-            } else if (size === 'medium') {
-                input.classList.add('h-64');
-                btnMedium.classList.add('height-btn-active');
-            } else if (size === 'large') {
-                input.classList.add('h-96');
-                btnLarge.classList.add('height-btn-active');
+        function closeDropdowns(e) {
+            if (!e.target.closest('#tag-dropdown-container')) {
+                tagDropdownMenu.classList.add('hidden');
             }
         }
 
-        // --- Rendering ---
+        function toggleTagDropdown(e) {
+            e.stopPropagation();
+            tagDropdownMenu.classList.toggle('hidden');
+            renderTagDropdown();
+        }
+
+        function toggleInputTag(cat) {
+            if (selectedInputTags.includes(cat)) {
+                selectedInputTags = selectedInputTags.filter(t => t !== cat);
+            } else {
+                selectedInputTags.push(cat);
+            }
+            renderTagDropdown();
+            updateSelectedTagsLabel();
+        }
+
+        function updateSelectedTagsLabel() {
+            if (selectedInputTags.length === 0) {
+                selectedTagsLabel.innerText = "Select Tags";
+                selectedTagsLabel.className = "text-zinc-500";
+            } else if (selectedInputTags.length === 1) {
+                selectedTagsLabel.innerText = selectedInputTags[0];
+                selectedTagsLabel.className = "text-zinc-900 font-medium";
+            } else {
+                selectedTagsLabel.innerText = `${selectedInputTags.length} Tags`;
+                selectedTagsLabel.className = "text-zinc-900 font-medium";
+            }
+        }
+
+        function renderTagDropdown() {
+            tagDropdownMenu.innerHTML = '';
+            categories.forEach(cat => {
+                const isSelected = selectedInputTags.includes(cat);
+                const label = document.createElement('label');
+                label.className = "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-zinc-50 transition-colors select-none group";
+                label.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" onchange="toggleInputTag('${cat}')" class="tag-checkbox hidden" ${isSelected ? 'checked' : ''}>
+                        <div class="w-4 h-4 rounded border border-zinc-300 flex items-center justify-center text-xs group-hover:border-zinc-400 transition-colors">
+                            ${isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white"></i>' : ''}
+                        </div>
+                        <span class="text-xs font-medium ${isSelected ? 'text-zinc-900' : 'text-zinc-600'}">${cat}</span>
+                    </div>
+                `;
+                tagDropdownMenu.appendChild(label);
+            });
+            
+            const addDiv = document.createElement('div');
+            addDiv.className = "border-t border-zinc-100 mt-1 pt-1";
+            addDiv.innerHTML = `
+                <button onclick="document.getElementById('add-category-dialog').showModal()" class="w-full text-left px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3 h-3"></i> Create "${categories.length > 0 ? '' : 'New'}"
+                </button>
+            `;
+            tagDropdownMenu.appendChild(addDiv);
+            
+            lucide.createIcons();
+        }
+
+        // --- Multi-Select Filter Rendering ---
         function render() {
-            renderCategories();
+            renderFilterBar();
             renderNotes();
-            updateNewNoteSelect();
+            updateSelectedTagsLabel();
             lucide.createIcons({ attrs: { 'stroke-width': '1.5' } });
         }
 
-        function renderCategories() {
+        function renderFilterBar() {
             categoryFilterContainer.innerHTML = '';
             
+            // 'All' Filter - Active if no specific filters are set
+            const isAllActive = activeFilters.length === 0;
+            const allBtn = document.createElement('button');
+            allBtn.onclick = () => toggleFilter('All');
+            allBtn.className = `px-4 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
+                isAllActive 
+                ? 'bg-zinc-900 border-zinc-900 text-white shadow-md' 
+                : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+            }`;
+            allBtn.innerText = 'All';
+            categoryFilterContainer.appendChild(allBtn);
+
+            // Tags
             categories.forEach(cat => {
-                const isActive = activeFilter === cat;
-                const isDeletable = cat !== 'All';
-                
+                const isActive = activeFilters.includes(cat);
                 const wrapper = document.createElement('div');
-                wrapper.className = `group/pill inline-flex items-center rounded-full border transition-all duration-200 cursor-pointer mb-1 ${
+                wrapper.className = `group/pill inline-flex items-center rounded-full border transition-all duration-200 cursor-pointer select-none ${
                     isActive 
                     ? 'bg-zinc-900 border-zinc-900 text-white shadow-md shadow-zinc-900/20' 
                     : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
                 }`;
                 
                 const labelBtn = document.createElement('button');
-                labelBtn.onclick = () => setFilter(cat);
-                labelBtn.className = `px-4 py-1.5 text-xs font-medium bg-transparent focus:outline-none ${isDeletable ? 'pr-2' : ''}`;
+                labelBtn.onclick = () => toggleFilter(cat);
+                labelBtn.className = "px-3 py-1.5 text-xs font-medium bg-transparent focus:outline-none";
                 labelBtn.innerText = cat;
-                
                 wrapper.appendChild(labelBtn);
-
-                if (isDeletable) {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.onclick = (e) => { 
-                        e.stopPropagation(); 
-                        deleteCategory(cat); 
-                    };
-                    deleteBtn.className = `pr-2 pl-0 py-1.5 flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity focus:outline-none ${isActive ? 'text-zinc-300 hover:text-white' : 'text-zinc-400 hover:text-red-500'}`;
-                    deleteBtn.title = "Delete Category";
-                    deleteBtn.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
-                    wrapper.appendChild(deleteBtn);
-                }
-
+                
+                // Delete Button (X)
+                const deleteBtn = document.createElement('button');
+                deleteBtn.onclick = (e) => { e.stopPropagation(); deleteCategory(cat); };
+                deleteBtn.className = `pr-2 pl-1 py-1.5 flex items-center justify-center opacity-0 group-hover/pill:opacity-100 transition-opacity focus:outline-none ${isActive ? 'text-zinc-300 hover:text-white' : 'text-zinc-400 hover:text-red-500'}`;
+                deleteBtn.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
+                deleteBtn.title = "Delete Tag";
+                
+                if(window.innerWidth < 640 && isActive) deleteBtn.classList.remove('opacity-0');
+                
+                wrapper.appendChild(deleteBtn);
                 categoryFilterContainer.appendChild(wrapper);
             });
 
-            // Add "+" Button
-            const addBtn = document.createElement('button');
-            addBtn.onclick = () => document.getElementById('add-category-dialog').showModal();
-            addBtn.className = "whitespace-nowrap px-3 py-1.5 mb-1 rounded-full text-xs font-medium bg-white text-zinc-400 border border-dashed border-zinc-300 hover:border-zinc-400 hover:text-zinc-600 transition-colors flex items-center gap-1";
-            addBtn.innerHTML = '<i data-lucide="plus" class="w-3 h-3"></i> Add';
-            categoryFilterContainer.appendChild(addBtn);
-        }
-
-        function updateNewNoteSelect() {
-            const currentVal = newNoteCategorySelect.value;
-            newNoteCategorySelect.innerHTML = '';
-            
-            const assignableCats = categories.filter(c => c !== 'All');
-            
-            assignableCats.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.text = cat;
-                newNoteCategorySelect.appendChild(option);
-            });
-
-            if (assignableCats.includes(currentVal)) {
-                newNoteCategorySelect.value = currentVal;
-            } else if (assignableCats.includes(activeFilter)) {
-                newNoteCategorySelect.value = activeFilter;
-            }
+            // New Tag Button (+)
+            const addTagBtn = document.createElement('button');
+            addTagBtn.onclick = () => document.getElementById('add-category-dialog').showModal();
+            addTagBtn.className = "ml-1 w-7 h-7 flex items-center justify-center rounded-full border border-dashed border-zinc-300 text-zinc-400 hover:text-zinc-900 hover:border-zinc-400 hover:bg-white transition-all";
+            addTagBtn.title = "Create New Tag";
+            addTagBtn.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5"></i>';
+            categoryFilterContainer.appendChild(addTagBtn);
         }
 
         function renderNotes() {
             container.innerHTML = '';
             
-            const filteredNotes = activeFilter === 'All' 
+            // Logic: Show note if no filters active OR if note has ANY of the active filters
+            const filteredNotes = activeFilters.length === 0 
                 ? notes 
-                : notes.filter(n => n.category === activeFilter);
+                : notes.filter(n => n.categories.some(cat => activeFilters.includes(cat)));
 
             countDisplay.innerText = filteredNotes.length;
 
@@ -357,123 +435,114 @@
             [...filteredNotes].reverse().forEach(note => {
                 const isLong = note.content.length > 150 || (note.content.match(/\n/g) || []).length > 3;
                 const colSpanClass = note.expanded ? 'col-span-1 sm:col-span-2 lg:col-span-3' : 'col-span-1';
-                const cardBaseClass = `group relative flex flex-col bg-white border border-zinc-200 rounded-xl p-6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 grid-item-transition ${colSpanClass} ${note.id === editingNoteId ? 'editing-mode' : ''}`;
                 
-                const card = document.createElement('div');
-                card.className = cardBaseClass;
-                
-                const assignableCats = categories.filter(c => c !== 'All');
-                const catOptions = assignableCats.map(c => 
-                    `<option value="${c}" ${c === note.category ? 'selected' : ''}>${c}</option>`
+                const tagsHtml = note.categories.map(cat => 
+                    `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-zinc-100 text-zinc-600 border border-zinc-200">${cat}</span>`
                 ).join('');
 
+                const card = document.createElement('div');
+                card.className = `group relative flex flex-col bg-white border border-zinc-200 rounded-xl p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 grid-item-transition ${colSpanClass} ${note.id === editingNoteId ? 'editing-mode ring-1 ring-emerald-200' : ''}`;
+                
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4 relative gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-medium tracking-wide text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-100">${note.date}</span>
-                            
-                            <div class="relative group/select">
-                                <select onchange="updateNoteCategory(${note.id}, this.value)" class="appearance-none bg-zinc-50 border border-zinc-100 hover:border-zinc-300 text-[11px] font-medium text-zinc-600 rounded-md py-1 pl-2 pr-6 focus:outline-none focus:ring-1 focus:ring-zinc-200 cursor-pointer transition-colors">
-                                    ${catOptions}
-                                </select>
-                                <i data-lucide="chevron-down" class="w-2.5 h-2.5 text-zinc-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                            </div>
-                        </div>
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-[10px] font-medium tracking-wide text-zinc-400 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">${note.date}</span>
                         
-                        <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <button onclick="copyToClipboard('${note.id}')" class="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Copy">
-                                <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+                        <div class="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                            <button onclick="copyToClipboard('${note.id}')" class="touch-target sm:touch-auto sm:p-1.5 flex items-center justify-center text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Copy">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                             </button>
-                            <button onclick="editNote(${note.id})" class="p-1.5 text-zinc-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
-                                <i data-lucide="pencil-line" class="w-3.5 h-3.5"></i>
+                            <button onclick="editNote(${note.id})" class="touch-target sm:touch-auto sm:p-1.5 flex items-center justify-center text-zinc-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
+                                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                             </button>
-                            <button onclick="deleteNote(${note.id})" class="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <button onclick="deleteNote(${note.id})" class="touch-target sm:touch-auto sm:p-1.5 flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
                     
-                    <div class="relative w-full flex-grow">
-                        <p class="text-sm font-mono text-zinc-600 leading-relaxed whitespace-pre-wrap break-words ${note.expanded ? '' : 'text-clamped'}" id="text-${note.id}">${escapeHtml(note.content)}</p>
+                    <div class="relative w-full flex-grow mb-3">
+                        <p class="text-sm font-mono text-zinc-600 leading-relaxed whitespace-pre-wrap break-words ${note.expanded ? '' : 'text-clamped'} selection:bg-zinc-200" id="text-${note.id}">${escapeHtml(note.content)}</p>
                         ${isLong && !note.expanded ? '<div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>' : ''}
                     </div>
 
-                    ${isLong ? `
-                    <div class="flex items-center justify-between mt-4 pt-2">
-                        <button onclick="toggleExpand(${note.id})" class="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors focus:outline-none py-1 px-2 -ml-2 rounded-md hover:bg-zinc-50">
-                            <span>${note.expanded ? 'Show less' : 'Show more'}</span>
-                            <i data-lucide="${note.expanded ? 'minimize-2' : 'chevron-down'}" class="w-3 h-3"></i>
-                        </button>
+                    <div class="mt-auto flex flex-col gap-3">
+                        ${note.categories.length > 0 ? `<div class="flex flex-wrap gap-1.5 w-full">${tagsHtml}</div>` : ''}
+                        
+                        ${isLong ? `
+                        <div class="flex items-center pt-1 border-t border-zinc-50 mt-1">
+                            <button onclick="toggleExpand(${note.id})" class="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none py-1 rounded-md">
+                                <span>${note.expanded ? 'Show less' : 'Show more'}</span>
+                                <i data-lucide="${note.expanded ? 'minimize-2' : 'chevron-down'}" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        ` : ''}
                     </div>
-                    ` : ''}
                 `;
                 container.appendChild(card);
             });
         }
 
-        // --- Logic ---
+        // --- Core Logic ---
 
-        function setFilter(category) {
-            activeFilter = category;
+        // Multi-select Logic
+        function toggleFilter(category) {
+            if (category === 'All') {
+                activeFilters = []; // Reset to empty implies 'Show All'
+            } else {
+                if (activeFilters.includes(category)) {
+                    activeFilters = activeFilters.filter(c => c !== category);
+                } else {
+                    activeFilters.push(category);
+                }
+            }
             render();
         }
 
         function confirmAddCategory() {
-            const input = document.getElementById('new-category-input');
-            const val = input.value.trim();
-            if (val && !categories.includes(val)) {
-                categories.push(val);
+            const inputVal = document.getElementById('new-category-input').value.trim();
+            if (inputVal && !categories.includes(inputVal)) {
+                categories.push(inputVal);
                 saveCategories();
                 render();
-                input.value = '';
+                document.getElementById('new-category-input').value = '';
                 document.getElementById('add-category-dialog').close();
-                showToast(`Category "${val}" added`);
-            } else if (categories.includes(val)) {
-                alert('Category already exists');
+                showToast(`Category "${inputVal}" added`);
             }
         }
 
         function deleteCategory(catName) {
-            if (catName === 'All') return;
-            if (confirm(`Delete category "${catName}"? Notes will move to "All".`)) {
+            if (confirm(`Permanently delete tag "${catName}"? This will remove it from all notes.`)) {
+                // Remove from Master list
                 categories = categories.filter(c => c !== catName);
-                saveCategories();
-                const fallbackCat = categories.find(c => c !== 'All') || 'All';
-                let notesUpdated = false;
+                
+                // Remove from Active Filters
+                activeFilters = activeFilters.filter(c => c !== catName);
+                
+                // Remove from Input Selections
+                selectedInputTags = selectedInputTags.filter(c => c !== catName);
+                
+                // Remove from All Notes
                 notes.forEach(note => {
-                    if (note.category === catName) {
-                        note.category = fallbackCat;
-                        notesUpdated = true;
-                    }
+                    note.categories = note.categories.filter(c => c !== catName);
                 });
-                if (notesUpdated) saveNotes();
-                if (activeFilter === catName) activeFilter = 'All';
-                render();
-                showToast(`Category "${catName}" deleted`);
-            }
-        }
-
-        function updateNoteCategory(id, newCat) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                note.category = newCat;
+                
+                saveCategories();
                 saveNotes();
-                if (activeFilter !== 'All' && activeFilter !== newCat) render();
-                showToast('Category updated');
+                
+                render();
+                showToast(`Tag "${catName}" deleted`);
             }
         }
 
         function addNote() {
             const text = input.value.trim();
-            const category = newNoteCategorySelect.value;
-            
             if (!text) return;
 
             if (editingNoteId) {
                 const noteIndex = notes.findIndex(n => n.id === editingNoteId);
                 if (noteIndex > -1) {
                     notes[noteIndex].content = text;
-                    notes[noteIndex].category = category;
+                    notes[noteIndex].categories = [...selectedInputTags];
                     notes[noteIndex].date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     notes[noteIndex].expanded = false;
                     showToast('Note updated');
@@ -485,7 +554,7 @@
                 const newNote = {
                     id: Date.now(),
                     content: text,
-                    category: category,
+                    categories: [...selectedInputTags],
                     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     expanded: false
                 };
@@ -494,6 +563,7 @@
             }
 
             input.value = '';
+            selectedInputTags = [];
             saveNotes();
             render();
         }
@@ -502,8 +572,9 @@
             const note = notes.find(n => n.id === id);
             if (!note) return;
             input.value = note.content;
-            newNoteCategorySelect.value = note.category;
+            selectedInputTags = [...note.categories];
             editingNoteId = id;
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
             input.focus();
             addUpdateText.innerText = 'Update Note';
@@ -512,16 +583,40 @@
         }
 
         function deleteNote(id) {
-            notes = notes.filter(n => n.id !== id);
-            if (editingNoteId === id) {
-                input.value = '';
-                editingNoteId = null;
-                addUpdateText.innerText = 'Add Note';
-                inputContainer.classList.remove('editing-mode');
+            const index = notes.findIndex(n => n.id === id);
+            if (index > -1) {
+                lastDeletedNote = notes[index];
+                lastDeletedIndex = index;
+                notes.splice(index, 1);
+                
+                if (editingNoteId === id) {
+                    editingNoteId = null;
+                    input.value = '';
+                    selectedInputTags = [];
+                    addUpdateText.innerText = 'Add Note';
+                    inputContainer.classList.remove('editing-mode');
+                }
+
+                saveNotes();
+                render();
+                showToast('Note deleted', true);
             }
-            saveNotes();
-            render();
-            showToast('Note deleted');
+        }
+
+        function undoAction() {
+            if (lastDeletedNote) {
+                if (lastDeletedIndex >= 0 && lastDeletedIndex <= notes.length) {
+                    notes.splice(lastDeletedIndex, 0, lastDeletedNote);
+                } else {
+                    notes.push(lastDeletedNote);
+                }
+                lastDeletedNote = null;
+                lastDeletedIndex = -1;
+                saveNotes();
+                render();
+                undoBtn.classList.add('hidden');
+                showToast('Action undone');
+            }
         }
 
         function toggleExpand(id) {
@@ -542,7 +637,6 @@
             } catch (err) {
                 const ta = document.createElement("textarea");
                 ta.value = note.content;
-                ta.style.position = "fixed"; ta.style.left = "-9999px";
                 document.body.appendChild(ta); ta.select();
                 try { document.execCommand('copy'); showToast('Copied'); } catch (e) {}
                 document.body.removeChild(ta);
@@ -550,11 +644,26 @@
         }
 
         let toastTimeout;
-        function showToast(message) {
+        function showToast(message, allowUndo = false) {
             toastMsg.innerText = message;
-            toast.classList.remove('translate-y-24', 'opacity-0');
+            const icon = document.getElementById('toast-icon');
+            
+            if (allowUndo) {
+                undoBtn.classList.remove('hidden');
+                icon.setAttribute('data-lucide', 'trash-2');
+            } else {
+                undoBtn.classList.add('hidden');
+                icon.setAttribute('data-lucide', 'check-circle-2');
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+                setTimeout(() => undoBtn.classList.add('hidden'), 300);
+                lastDeletedNote = null;
+            }, 4000);
         }
 
         function escapeHtml(text) {
@@ -563,21 +672,6 @@
             });
         }
 
-        input.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault(); addNote();
-            }
-        });
-
-        input.addEventListener('keyup', (e) => {
-            if (e.key === 'Escape' && editingNoteId) {
-                editingNoteId = null; input.value = ''; render();
-                addUpdateText.innerText = 'Add Note';
-                inputContainer.classList.remove('editing-mode');
-            }
-        });
-
-        // Init
         render();
     </script>
 </body>
