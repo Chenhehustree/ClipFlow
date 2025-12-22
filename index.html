@@ -50,9 +50,14 @@
             transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
-        /* Smooth layout transitions (Applied to grid items) */
+        /* Smooth layout transitions */
         .grid-item-transition {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Input Height Transition */
+        #input-text {
+            transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         /* Custom Styles for Editing State */
@@ -60,11 +65,19 @@
             background-color: #f0fdf4 !important; /* Tailwind: bg-emerald-50 */
             border-color: #d1fae5 !important; /* Tailwind: border-emerald-200 */
         }
+        
+        /* Active state for height buttons */
+        .height-btn-active {
+            background-color: #f4f4f5; /* zinc-100 */
+            color: #18181b; /* zinc-900 */
+            border-color: #e4e4e7; /* zinc-200 */
+        }
     </style>
 </head>
 <body class="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8">
 
-    <div class="w-full max-w-5xl space-y-8 mb-10">
+    <!-- Header & Input Section -->
+    <div class="w-full max-w-7xl space-y-8 mb-10">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="p-2.5 bg-zinc-900 rounded-xl text-white shadow-lg shadow-zinc-900/10">
@@ -82,33 +95,81 @@
                 <div id="input-container" class="relative bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-300 focus-ring-anim transition-shadow hover:shadow-md transition-all duration-300">
                 <textarea 
                     id="input-text" 
-                    placeholder="Paste or type your content here..." class="w-full h-28 p-6 resize-none outline-none text-base text-zinc-700 placeholder:text-zinc-400 bg-transparent leading-relaxed"
+                    placeholder="Paste or type your content here..." class="w-full h-32 p-6 resize-none outline-none text-base text-zinc-700 placeholder:text-zinc-400 bg-transparent leading-relaxed font-mono"
                 ></textarea>
-                <div class="flex items-center justify-between px-5 py-3 border-t border-zinc-50 bg-zinc-50/80">
-                    <span class="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
-                        <i data-lucide="keyboard" class="w-3.5 h-3.5"></i>
-                        <span>Cmd/Ctrl + V to paste</span> </span>
-                                    <button onclick="addNote()" id="add-update-btn" class="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-lg transition-all active:scale-95 shadow-sm hover:shadow-md">
-                        <i data-lucide="plus" class="w-3.5 h-3.5" id="add-update-icon"></i>
-                        <span id="add-update-text">Add Note</span> </button>
+                <div class="flex flex-wrap items-center justify-between px-5 py-3 border-t border-zinc-50 bg-zinc-50/80 gap-3">
+                    <div class="flex items-center gap-4 flex-wrap">
+                        
+                        <!-- Category Selector -->
+                        <div class="relative flex items-center group/cat">
+                            <i data-lucide="tag" class="w-3.5 h-3.5 text-zinc-400 absolute left-2 pointer-events-none"></i>
+                            <select id="new-note-category" class="pl-7 pr-8 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0 cursor-pointer appearance-none transition-colors hover:border-zinc-300">
+                                <!-- Populated by JS -->
+                            </select>
+                            <i data-lucide="chevron-down" class="w-3 h-3 text-zinc-400 absolute right-2 pointer-events-none"></i>
+                        </div>
+
+                        <!-- Height Controls -->
+                        <div class="flex items-center gap-1 border-l border-zinc-200 pl-4">
+                            <button onclick="setInputHeight('small')" id="btn-h-small" class="height-btn-active p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Small Height">
+                                <i data-lucide="minus" class="w-3 h-3"></i>
+                            </button>
+                            <button onclick="setInputHeight('medium')" id="btn-h-medium" class="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Medium Height">
+                                <i data-lucide="align-justify" class="w-3 h-3"></i>
+                            </button>
+                            <button onclick="setInputHeight('large')" id="btn-h-large" class="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Large Height">
+                                <i data-lucide="maximize-2" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="hidden sm:flex text-xs text-zinc-400 items-center gap-1.5 font-medium">
+                            <i data-lucide="keyboard" class="w-3.5 h-3.5"></i>
+                            <span>Cmd + Enter</span> 
+                        </span>
+                        <button onclick="addNote()" id="add-update-btn" class="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-lg transition-all active:scale-95 shadow-sm hover:shadow-md">
+                            <i data-lucide="plus" class="w-3.5 h-3.5" id="add-update-icon"></i>
+                            <span id="add-update-text">Add Note</span> 
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="notes-container" class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20 items-start">
+    <!-- Category Filter Bar: Changed to flex-wrap -->
+    <div class="w-full max-w-7xl mb-8">
+        <div class="flex flex-wrap items-center gap-2 pb-2" id="category-filter-container">
+            <!-- Populated by JS -->
         </div>
+    </div>
+
+    <!-- Notes Grid -->
+    <div id="notes-container" class="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 items-start">
+    </div>
 
     <div id="empty-state" class="hidden flex-col items-center justify-center py-24 text-center space-y-5">
         <div class="w-16 h-16 bg-white border border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-300 shadow-sm">
             <i data-lucide="clipboard-list" class="w-8 h-8"></i>
         </div>
         <div>
-            <h3 class="text-lg font-medium tracking-tight text-zinc-900">No clips yet</h3>
-            <p class="text-sm text-zinc-500 mt-2 max-w-xs mx-auto leading-relaxed">Copy text from anywhere and paste it here, or type a new note to get started.</p>
+            <h3 class="text-lg font-medium tracking-tight text-zinc-900">No clips found</h3>
+            <p class="text-sm text-zinc-500 mt-2 max-w-xs mx-auto leading-relaxed">Adjust filters or add a new note to get started.</p>
         </div>
-        
     </div>
+
+    <!-- Add Category Modal -->
+    <dialog id="add-category-dialog" class="p-0 rounded-xl shadow-xl backdrop:bg-zinc-900/20 border border-zinc-200 bg-white">
+        <div class="w-80 p-6">
+            <h3 class="text-lg font-medium text-zinc-900 mb-4">New Category</h3>
+            <input type="text" id="new-category-input" placeholder="e.g., Vocabulary" class="w-full px-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 mb-4">
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('add-category-dialog').close()" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors">Cancel</button>
+                <button onclick="confirmAddCategory()" class="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">Add</button>
+            </div>
+        </div>
+    </dialog>
 
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-5 py-3 bg-zinc-900 text-white rounded-full shadow-xl transform translate-y-24 opacity-0 transition-all duration-400 z-50">
         <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
@@ -116,43 +177,33 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'clipflow_notes';
+        const STORAGE_KEY = 'clipflow_notes_v2';
+        const CAT_STORAGE_KEY = 'clipflow_categories';
 
-        // Initial default data if localStorage is empty
+        // Default Data
+        const defaultCategories = ['All', 'Work', 'Code', 'Ideas', 'ToDo', 'Links', 'Snippets'];
         const defaultNotes = [
             {
                 id: 1,
-                // 修复 2: 替换为英文内容
-                content: "Tailwind CSS is a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup. It allows for rapid UI development without leaving your HTML.",
+                content: "Tailwind CSS is a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design.",
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                expanded: false
+                expanded: false,
+                category: 'Code'
             },
             {
                 id: 2,
-                // 修复 2: 替换为英文内容
-                content: "Design is not just what it looks like and feels like. Design is how it works. - Steve Jobs. This quote emphasizes functionality over pure aesthetics.",
+                content: "Design is not just what it looks like and feels like. Design is how it works. - Steve Jobs.",
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                expanded: false
-            },
-            {
-                id: 3,
-                // 修复 2: 替换为英文内容
-                content: "function calculateFactorial(n) {\n  if (n === 0 || n === 1) return 1;\n  return n * calculateFactorial(n - 1);\n}\n\n// Recursive solution for calculating factorial in JavaScript. This function calls itself until it reaches the base case.",
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                expanded: true
-            },
-            {
-                id: 4,
-                // 修复 2: 替换为英文内容
-                content: "Meeting notes: \n1. Discuss Q4 roadmap \n2. Review budget allocation \n3. Team building event ideas. \n\nNeed to follow up with Sarah regarding the design assets by Friday. Don't forget to check the new linear gradient updates in the design system.",
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                expanded: false
+                expanded: false,
+                category: 'Ideas'
             }
         ];
 
-        // State Management - Load from localStorage or use defaults
+        // State Management
         let notes = loadNotes();
-        let editingNoteId = null; // Track the ID of the note currently being edited
+        let categories = loadCategories();
+        let activeFilter = 'All';
+        let editingNoteId = null;
 
         // DOM Elements
         const container = document.getElementById('notes-container');
@@ -163,60 +214,139 @@
         const toastMsg = document.getElementById('toast-message');
         const inputContainer = document.getElementById('input-container');
         const addUpdateText = document.getElementById('add-update-text');
-        
-        // --- Persistence Functions ---
+        const categoryFilterContainer = document.getElementById('category-filter-container');
+        const newNoteCategorySelect = document.getElementById('new-note-category');
 
-        /**
-         * Loads notes from localStorage.
-         */
+        // Input Height Buttons
+        const btnSmall = document.getElementById('btn-h-small');
+        const btnMedium = document.getElementById('btn-h-medium');
+        const btnLarge = document.getElementById('btn-h-large');
+
+        // --- Persistence ---
         function loadNotes() {
             try {
-                const storedNotes = localStorage.getItem(STORAGE_KEY);
-                if (storedNotes) {
-                    // Parse stored data. Ensure 'expanded' property is present.
-                    const parsedNotes = JSON.parse(storedNotes);
-                    return parsedNotes.map(note => ({
-                        ...note,
-                        expanded: note.expanded || false // Default to false if missing
-                    }));
-                }
-            } catch (error) {
-                console.error("Error loading notes from localStorage:", error);
-            }
-            return defaultNotes;
+                const stored = localStorage.getItem(STORAGE_KEY);
+                return stored ? JSON.parse(stored) : defaultNotes;
+            } catch (e) { return defaultNotes; }
         }
 
-        /**
-         * Saves the current notes state to localStorage.
-         */
-        function saveNotes() {
+        function loadCategories() {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-            } catch (error) {
-                console.error("Error saving notes to localStorage:", error);
+                const stored = localStorage.getItem(CAT_STORAGE_KEY);
+                return stored ? JSON.parse(stored) : defaultCategories;
+            } catch (e) { return defaultCategories; }
+        }
+
+        function saveNotes() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        }
+
+        function saveCategories() {
+            localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(categories));
+        }
+
+        // --- UI Control: Input Height ---
+        function setInputHeight(size) {
+            // Reset buttons
+            [btnSmall, btnMedium, btnLarge].forEach(btn => btn.classList.remove('height-btn-active'));
+            
+            // Remove previous height classes
+            input.classList.remove('h-32', 'h-64', 'h-96');
+
+            if (size === 'small') {
+                input.classList.add('h-32');
+                btnSmall.classList.add('height-btn-active');
+            } else if (size === 'medium') {
+                input.classList.add('h-64');
+                btnMedium.classList.add('height-btn-active');
+            } else if (size === 'large') {
+                input.classList.add('h-96');
+                btnLarge.classList.add('height-btn-active');
             }
         }
 
-        // --- Core Functions ---
-
-        // Render Function
+        // --- Rendering ---
         function render() {
-            container.innerHTML = '';
-            countDisplay.innerText = notes.length;
+            renderCategories();
+            renderNotes();
+            updateNewNoteSelect();
+            lucide.createIcons({ attrs: { 'stroke-width': '1.5' } });
+        }
 
-            // Update input button state based on editingNoteId
-            if (editingNoteId) {
-                addUpdateText.innerText = 'Update Note';
-                inputContainer.classList.add('editing-mode');
-                inputContainer.classList.add('ring-emerald-400/50');
-            } else {
-                addUpdateText.innerText = 'Add Note';
-                inputContainer.classList.remove('editing-mode');
-                inputContainer.classList.remove('ring-emerald-400/50');
+        function renderCategories() {
+            categoryFilterContainer.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const isActive = activeFilter === cat;
+                const isDeletable = cat !== 'All';
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = `group/pill inline-flex items-center rounded-full border transition-all duration-200 cursor-pointer mb-1 ${
+                    isActive 
+                    ? 'bg-zinc-900 border-zinc-900 text-white shadow-md shadow-zinc-900/20' 
+                    : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                }`;
+                
+                const labelBtn = document.createElement('button');
+                labelBtn.onclick = () => setFilter(cat);
+                labelBtn.className = `px-4 py-1.5 text-xs font-medium bg-transparent focus:outline-none ${isDeletable ? 'pr-2' : ''}`;
+                labelBtn.innerText = cat;
+                
+                wrapper.appendChild(labelBtn);
+
+                if (isDeletable) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.onclick = (e) => { 
+                        e.stopPropagation(); 
+                        deleteCategory(cat); 
+                    };
+                    deleteBtn.className = `pr-2 pl-0 py-1.5 flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity focus:outline-none ${isActive ? 'text-zinc-300 hover:text-white' : 'text-zinc-400 hover:text-red-500'}`;
+                    deleteBtn.title = "Delete Category";
+                    deleteBtn.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
+                    wrapper.appendChild(deleteBtn);
+                }
+
+                categoryFilterContainer.appendChild(wrapper);
+            });
+
+            // Add "+" Button
+            const addBtn = document.createElement('button');
+            addBtn.onclick = () => document.getElementById('add-category-dialog').showModal();
+            addBtn.className = "whitespace-nowrap px-3 py-1.5 mb-1 rounded-full text-xs font-medium bg-white text-zinc-400 border border-dashed border-zinc-300 hover:border-zinc-400 hover:text-zinc-600 transition-colors flex items-center gap-1";
+            addBtn.innerHTML = '<i data-lucide="plus" class="w-3 h-3"></i> Add';
+            categoryFilterContainer.appendChild(addBtn);
+        }
+
+        function updateNewNoteSelect() {
+            const currentVal = newNoteCategorySelect.value;
+            newNoteCategorySelect.innerHTML = '';
+            
+            const assignableCats = categories.filter(c => c !== 'All');
+            
+            assignableCats.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.text = cat;
+                newNoteCategorySelect.appendChild(option);
+            });
+
+            if (assignableCats.includes(currentVal)) {
+                newNoteCategorySelect.value = currentVal;
+            } else if (assignableCats.includes(activeFilter)) {
+                newNoteCategorySelect.value = activeFilter;
             }
+        }
 
+        function renderNotes() {
+            container.innerHTML = '';
+            
+            const filteredNotes = activeFilter === 'All' 
+                ? notes 
+                : notes.filter(n => n.category === activeFilter);
 
-            if (notes.length === 0) {
+            countDisplay.innerText = filteredNotes.length;
+
+            if (filteredNotes.length === 0) {
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
             } else {
@@ -224,221 +354,231 @@
                 emptyState.classList.remove('flex');
             }
 
-            // Using Grid Layout Logic
-            [...notes].reverse().forEach(note => {
-                const isLong = note.content.length > 120 || (note.content.match(/\n/g) || []).length > 3;
-                
-                // Grid Span Logic for Expanded Items
-                const colSpanClass = note.expanded 
-                    ? 'col-span-1 sm:col-span-2 lg:col-span-3' 
-                    : 'col-span-1';
-
-                // FIX 1: Added 'flex flex-col' here to ensure card contents stack vertically correctly in Grid.
+            [...filteredNotes].reverse().forEach(note => {
+                const isLong = note.content.length > 150 || (note.content.match(/\n/g) || []).length > 3;
+                const colSpanClass = note.expanded ? 'col-span-1 sm:col-span-2 lg:col-span-3' : 'col-span-1';
                 const cardBaseClass = `group relative flex flex-col bg-white border border-zinc-200 rounded-xl p-6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 grid-item-transition ${colSpanClass} ${note.id === editingNoteId ? 'editing-mode' : ''}`;
                 
                 const card = document.createElement('div');
                 card.className = cardBaseClass;
-                card.id = `card-${note.id}`;
                 
-                const contentClass = note.expanded ? '' : 'text-clamped';
-                const expandBtnText = note.expanded ? 'Show less' : 'Show more'; // 修复 1: 确保文本是英文
-                const expandBtnIcon = note.expanded ? 'minimize-2' : 'chevron-down';
-                const actionFunc = `toggleExpand(${note.id})`;
+                const assignableCats = categories.filter(c => c !== 'All');
+                const catOptions = assignableCats.map(c => 
+                    `<option value="${c}" ${c === note.category ? 'selected' : ''}>${c}</option>`
+                ).join('');
 
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4 relative">
-                        <span class="text-[11px] font-medium tracking-wide text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-100">${note.date}</span>
+                    <div class="flex justify-between items-start mb-4 relative gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-medium tracking-wide text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-100">${note.date}</span>
+                            
+                            <div class="relative group/select">
+                                <select onchange="updateNoteCategory(${note.id}, this.value)" class="appearance-none bg-zinc-50 border border-zinc-100 hover:border-zinc-300 text-[11px] font-medium text-zinc-600 rounded-md py-1 pl-2 pr-6 focus:outline-none focus:ring-1 focus:ring-zinc-200 cursor-pointer transition-colors">
+                                    ${catOptions}
+                                </select>
+                                <i data-lucide="chevron-down" class="w-2.5 h-2.5 text-zinc-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                            </div>
+                        </div>
                         
                         <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <button onclick="copyToClipboard('${note.id}')" class="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Copy to Clipboard">
+                            <button onclick="copyToClipboard('${note.id}')" class="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Copy">
                                 <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
                             </button>
-                                
-                            <button onclick="editNote(${note.id})" class="p-1.5 text-zinc-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit Note">
+                            <button onclick="editNote(${note.id})" class="p-1.5 text-zinc-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
                                 <i data-lucide="pencil-line" class="w-3.5 h-3.5"></i>
                             </button>
-
                             <button onclick="deleteNote(${note.id})" class="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
                     
-                                        <div class="relative w-full flex-grow">
-                        <p class="text-base text-zinc-600 leading-7 whitespace-pre-wrap break-words font-normal ${contentClass}" id="text-${note.id}" onmouseup="window.getSelection().removeAllRanges()" ontouchend="window.getSelection().removeAllRanges()">${escapeHtml(note.content)}</p>
+                    <div class="relative w-full flex-grow">
+                        <p class="text-sm font-mono text-zinc-600 leading-relaxed whitespace-pre-wrap break-words ${note.expanded ? '' : 'text-clamped'}" id="text-${note.id}">${escapeHtml(note.content)}</p>
                         ${isLong && !note.expanded ? '<div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>' : ''}
                     </div>
 
                     ${isLong ? `
                     <div class="flex items-center justify-between mt-4 pt-2">
-                        <button onclick="${actionFunc}" class="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors focus:outline-none py-1 px-2 -ml-2 rounded-md hover:bg-zinc-50">
-                            <span>${expandBtnText}</span>
-                            <i data-lucide="${expandBtnIcon}" class="w-3 h-3"></i>
+                        <button onclick="toggleExpand(${note.id})" class="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors focus:outline-none py-1 px-2 -ml-2 rounded-md hover:bg-zinc-50">
+                            <span>${note.expanded ? 'Show less' : 'Show more'}</span>
+                            <i data-lucide="${note.expanded ? 'minimize-2' : 'chevron-down'}" class="w-3 h-3"></i>
                         </button>
                     </div>
                     ` : ''}
                 `;
-                
                 container.appendChild(card);
-            });
-            
-            // Re-initialize icons with thinner stroke
-            lucide.createIcons({
-                attrs: {
-                    'stroke-width': '1.5'
-                }
             });
         }
 
-        // Add/Update Note
+        // --- Logic ---
+
+        function setFilter(category) {
+            activeFilter = category;
+            render();
+        }
+
+        function confirmAddCategory() {
+            const input = document.getElementById('new-category-input');
+            const val = input.value.trim();
+            if (val && !categories.includes(val)) {
+                categories.push(val);
+                saveCategories();
+                render();
+                input.value = '';
+                document.getElementById('add-category-dialog').close();
+                showToast(`Category "${val}" added`);
+            } else if (categories.includes(val)) {
+                alert('Category already exists');
+            }
+        }
+
+        function deleteCategory(catName) {
+            if (catName === 'All') return;
+            if (confirm(`Delete category "${catName}"? Notes will move to "All".`)) {
+                categories = categories.filter(c => c !== catName);
+                saveCategories();
+                const fallbackCat = categories.find(c => c !== 'All') || 'All';
+                let notesUpdated = false;
+                notes.forEach(note => {
+                    if (note.category === catName) {
+                        note.category = fallbackCat;
+                        notesUpdated = true;
+                    }
+                });
+                if (notesUpdated) saveNotes();
+                if (activeFilter === catName) activeFilter = 'All';
+                render();
+                showToast(`Category "${catName}" deleted`);
+            }
+        }
+
+        function updateNoteCategory(id, newCat) {
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                note.category = newCat;
+                saveNotes();
+                if (activeFilter !== 'All' && activeFilter !== newCat) render();
+                showToast('Category updated');
+            }
+        }
+
         function addNote() {
             const text = input.value.trim();
+            const category = newNoteCategorySelect.value;
+            
             if (!text) return;
 
             if (editingNoteId) {
-                // --- Update Logic ---
                 const noteIndex = notes.findIndex(n => n.id === editingNoteId);
                 if (noteIndex > -1) {
                     notes[noteIndex].content = text;
+                    notes[noteIndex].category = category;
                     notes[noteIndex].date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    notes[noteIndex].expanded = false; // Collapse upon update
-                    showToast('Note updated successfully');
+                    notes[noteIndex].expanded = false;
+                    showToast('Note updated');
                 }
-                editingNoteId = null; // Exit editing mode
+                editingNoteId = null;
+                addUpdateText.innerText = 'Add Note';
+                inputContainer.classList.remove('editing-mode', 'ring-emerald-400/50');
             } else {
-                // --- Add New Logic ---
                 const newNote = {
                     id: Date.now(),
                     content: text,
+                    category: category,
                     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     expanded: false
                 };
                 notes.push(newNote);
-                showToast('Note added successfully');
+                showToast('Note added');
             }
 
             input.value = '';
-            saveNotes(); // Persist data
+            saveNotes();
             render();
         }
 
-        // Edit Note
         function editNote(id) {
             const note = notes.find(n => n.id === id);
             if (!note) return;
-
-            // 1. Set the note content to the input field
             input.value = note.content;
-            
-            // 2. Store the ID of the note being edited
+            newNoteCategorySelect.value = note.category;
             editingNoteId = id;
-
-            // 3. Scroll to the top and focus the input for easy editing
             window.scrollTo({ top: 0, behavior: 'smooth' });
             input.focus();
-
-            // 4. Update the UI to reflect editing mode
-            render(); 
+            addUpdateText.innerText = 'Update Note';
+            inputContainer.classList.add('editing-mode', 'ring-emerald-400/50');
+            render();
         }
 
-        // Delete Note
         function deleteNote(id) {
-            notes = notes.filter(note => note.id !== id);
+            notes = notes.filter(n => n.id !== id);
             if (editingNoteId === id) {
-                // If the deleted note was being edited, clear the input
                 input.value = '';
                 editingNoteId = null;
+                addUpdateText.innerText = 'Add Note';
+                inputContainer.classList.remove('editing-mode');
             }
-            saveNotes(); // Persist data
+            saveNotes();
             render();
             showToast('Note deleted');
         }
 
-        // Toggle Expand/Collapse
         function toggleExpand(id) {
-            const noteIndex = notes.findIndex(n => n.id === id);
-            if (noteIndex > -1) {
-                notes[noteIndex].expanded = !notes[noteIndex].expanded;
-                saveNotes(); // Save expansion state
-                render(); 
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                note.expanded = !note.expanded;
+                saveNotes();
+                render();
             }
         }
 
-        // Copy Functionality
         async function copyToClipboard(id) {
             const note = notes.find(n => n.id == id);
             if (!note) return;
-            
             try {
-                // Use modern Clipboard API for reliable copy
                 await navigator.clipboard.writeText(note.content);
                 showToast('Copied to clipboard');
             } catch (err) {
-                // Fallback for older browsers or security blocks
-                console.error('Failed to use Clipboard API:', err);
-                const textArea = document.createElement("textarea");
-                textArea.value = note.content;
-                textArea.style.position = "fixed"; 
-                textArea.style.left = "-999999px"; 
-                textArea.style.top = "-999999px";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showToast('Copied to clipboard (Fallback)');
-                } catch (e) {
-                    showToast('Failed to copy');
-                }
-                document.body.removeChild(textArea);
+                const ta = document.createElement("textarea");
+                ta.value = note.content;
+                ta.style.position = "fixed"; ta.style.left = "-9999px";
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); showToast('Copied'); } catch (e) {}
+                document.body.removeChild(ta);
             }
         }
 
-        // Toast Notification Logic
         let toastTimeout;
         function showToast(message) {
             toastMsg.innerText = message;
             toast.classList.remove('translate-y-24', 'opacity-0');
-            
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 2500);
+            toastTimeout = setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
         }
 
-        // Escape HTML for security
         function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            // Use replace with a function for all matches
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            return text.replace(/[&<>"']/g, function(m) { 
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]; 
+            });
         }
 
-        // Listen for Ctrl/Cmd + Enter to submit
         input.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault(); // Prevent default new line
-                addNote();
+                e.preventDefault(); addNote();
             }
         });
 
-        // Listen for Escape key to exit editing mode
         input.addEventListener('keyup', (e) => {
             if (e.key === 'Escape' && editingNoteId) {
-                editingNoteId = null;
-                input.value = '';
-                render();
+                editingNoteId = null; input.value = ''; render();
+                addUpdateText.innerText = 'Add Note';
+                inputContainer.classList.remove('editing-mode');
             }
         });
 
-        // Initialize
+        // Init
         render();
-
     </script>
 </body>
 </html>
