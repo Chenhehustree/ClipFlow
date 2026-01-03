@@ -9,80 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Base Settings */
-        :root {
-            --font-inter: 'Inter', sans-serif;
-        }
-        body {
-            font-family: var(--font-inter);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #e4e4e7;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d4d4d8;
-        }
-
-        /* Text Clamping */
-        .text-clamped {
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        /* Animation Utilities */
-        .focus-ring-anim {
-            transition: box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-        .grid-item-transition {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #input-text {
-            transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        .editing-mode {
-            background-color: #f0fdf4 !important; /* bg-emerald-50 */
-            border-color: #d1fae5 !important; /* border-emerald-200 */
-        }
-        .height-btn-active {
-            background-color: #f4f4f5;
-            color: #18181b;
-            border-color: #e4e4e7;
-        }
-
-        /* Tag Styles */
-        .tag-pill {
-            transition: all 0.2s;
-        }
-        .tag-checkbox:checked + div {
-            background-color: #18181b; /* zinc-900 */
-            color: white;
-            border-color: #18181b;
-        }
-        
-        /* Mobile Safety */
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8" onclick="closeDropdowns(event)">
+<body class="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8">
 
     <!-- Header & Input Section -->
     <div class="w-full max-w-7xl space-y-8 mb-10">
@@ -100,7 +29,7 @@
 
         <div class="relative group">
             <div class="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-700"></div>
-                <div id="input-container" class="relative bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-visible focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-300 focus-ring-anim transition-all duration-300 z-20">
+            <div id="input-container" class="relative bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-visible focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-300 focus-ring-anim transition-all duration-300 z-20">
                 <textarea 
                     id="input-text" 
                     placeholder="Paste or type your content here..." class="w-full h-32 p-6 resize-none outline-none text-base text-zinc-700 placeholder:text-zinc-400 bg-transparent leading-relaxed font-mono rounded-t-2xl"
@@ -112,28 +41,29 @@
                         
                         <!-- Multi-Select Category Dropdown -->
                         <div class="relative" id="tag-dropdown-container">
-                            <button onclick="toggleTagDropdown(event)" id="tag-dropdown-btn" class="flex items-center gap-2 pl-2.5 pr-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 transition-colors focus:outline-none">
+                            <button id="tag-dropdown-btn" class="flex items-center gap-2 pl-2.5 pr-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 transition-colors focus:outline-none">
                                 <i data-lucide="tags" class="w-3.5 h-3.5 text-zinc-400"></i>
                                 <span id="selected-tags-label">Select Tags</span>
                                 <i data-lucide="chevron-down" class="w-3 h-3 text-zinc-300 ml-1"></i>
                             </button>
 
                             <!-- Dropdown Menu -->
-                            <div id="tag-dropdown-menu" class="hidden absolute bottom-full left-0 mb-2 w-48 bg-white border border-zinc-200 rounded-xl shadow-xl p-2 z-50 flex flex-col gap-1 max-h-60 overflow-y-auto">
-                                <!-- Populated by JS -->
+                            <div id="tag-dropdown-menu" class="hidden absolute top-full left-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-none bg-white border border-zinc-200 rounded-xl shadow-xl z-50 flex max-h-80 min-h-[200px] overflow-hidden" style="max-width: calc(100vw - 2rem);">
+                                <!-- 左列：父级标签 -->
+                                <div id="tag-dropdown-parent-list" class="w-1/2 border-r border-zinc-200 flex flex-col overflow-y-auto min-h-0" style="max-height: 100%;">
+                                    <!-- Populated by JS -->
+                                </div>
+                                <!-- 右列：子级标签 -->
+                                <div id="tag-dropdown-child-list" class="w-1/2 flex flex-col overflow-y-auto min-h-0" style="max-height: 100%;">
+                                    <!-- Populated by JS -->
+                                </div>
                             </div>
                         </div>
 
                         <!-- Height Controls -->
                         <div class="flex items-center gap-1 border-l border-zinc-200 pl-4">
-                            <button onclick="setInputHeight('small')" id="btn-h-small" class="height-btn-active p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Small Height">
-                                <i data-lucide="minus" class="w-3 h-3"></i>
-                            </button>
-                            <button onclick="setInputHeight('medium')" id="btn-h-medium" class="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Medium Height">
-                                <i data-lucide="align-justify" class="w-3 h-3"></i>
-                            </button>
-                            <button onclick="setInputHeight('large')" id="btn-h-large" class="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Large Height">
-                                <i data-lucide="maximize-2" class="w-3 h-3"></i>
+                            <button id="btn-h-toggle" class="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 border border-transparent hover:bg-white hover:border-zinc-200 transition-all" title="Toggle Height">
+                                <i data-lucide="maximize-2" class="w-3 h-3" id="btn-h-toggle-icon"></i>
                             </button>
                         </div>
                     </div>
@@ -143,7 +73,7 @@
                             <i data-lucide="keyboard" class="w-3.5 h-3.5"></i>
                             <span>Cmd + Enter</span> 
                         </span>
-                        <button onclick="addNote()" id="add-update-btn" class="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-lg transition-all active:scale-95 shadow-sm hover:shadow-md">
+                        <button id="add-update-btn" class="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-lg transition-all active:scale-95 shadow-sm hover:shadow-md">
                             <i data-lucide="plus" class="w-3.5 h-3.5" id="add-update-icon"></i>
                             <span id="add-update-text">Add Note</span> 
                         </button>
@@ -162,6 +92,7 @@
 
     <!-- Notes Grid -->
     <div id="notes-container" class="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 items-start">
+        <!-- Populated by JS -->
     </div>
 
     <!-- Empty State -->
@@ -180,14 +111,31 @@
         <div class="w-80 p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-medium text-zinc-900">New Category</h3>
-                <button onclick="document.getElementById('add-category-dialog').close()" class="text-zinc-400 hover:text-zinc-600">
+                <button data-action="close-dialog" class="text-zinc-400 hover:text-zinc-600">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
             <input type="text" id="new-category-input" placeholder="e.g., Vocabulary" class="w-full px-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 mb-4">
             <div class="flex justify-end gap-2">
-                <button onclick="document.getElementById('add-category-dialog').close()" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors">Cancel</button>
-                <button onclick="confirmAddCategory()" class="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">Add Category</button>
+                <button data-action="cancel-dialog" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors">Cancel</button>
+                <button data-action="confirm-add-category" class="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">Add Category</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Rename Tag Modal -->
+    <dialog id="rename-tag-dialog" class="p-0 rounded-xl shadow-xl backdrop:bg-zinc-900/20 border border-zinc-200 bg-white">
+        <div class="w-80 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-zinc-900">Rename Tag</h3>
+                <button data-action="close-rename-dialog" class="text-zinc-400 hover:text-zinc-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <input type="text" id="rename-tag-input" placeholder="Enter new tag name" class="w-full px-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 mb-4">
+            <div class="flex justify-end gap-2">
+                <button data-action="cancel-rename-dialog" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors">Cancel</button>
+                <button data-action="confirm-rename-tag" class="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">Rename</button>
             </div>
         </div>
     </dialog>
@@ -198,481 +146,11 @@
             <i data-lucide="info" class="w-4 h-4 text-zinc-400" id="toast-icon"></i>
             <span class="text-sm font-medium" id="toast-message">Notification</span>
         </div>
-        <button id="undo-btn" onclick="undoAction()" class="hidden text-xs font-semibold text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors">
+        <button id="undo-btn" class="hidden text-xs font-semibold text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors">
             Undo
         </button>
     </div>
 
-    <script>
-        const STORAGE_KEY = 'clipflow_notes_v3';
-        const CAT_STORAGE_KEY = 'clipflow_categories_v2';
-
-        // Default Data
-        const defaultCategories = ['Work', 'Code', 'Ideas', 'ToDo', 'Links', 'Personal'];
-        const defaultNotes = [
-            {
-                id: 1,
-                content: "Tailwind CSS is a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90.",
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                expanded: false,
-                categories: ['Code', 'Work']
-            },
-            {
-                id: 2,
-                content: "Design is not just what it looks like and feels like. Design is how it works.",
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                expanded: false,
-                categories: ['Ideas']
-            }
-        ];
-
-        // State Management
-        let notes = loadNotes();
-        let categories = loadCategories();
-        let activeFilters = []; // Empty array = 'All' behavior
-        let editingNoteId = null;
-        let selectedInputTags = [];
-        
-        let lastDeletedNote = null;
-        let lastDeletedIndex = -1;
-
-        // DOM Elements
-        const container = document.getElementById('notes-container');
-        const input = document.getElementById('input-text');
-        const emptyState = document.getElementById('empty-state');
-        const countDisplay = document.getElementById('count-display');
-        const toast = document.getElementById('toast');
-        const toastMsg = document.getElementById('toast-message');
-        const undoBtn = document.getElementById('undo-btn');
-        const inputContainer = document.getElementById('input-container');
-        const addUpdateText = document.getElementById('add-update-text');
-        const categoryFilterContainer = document.getElementById('category-filter-container');
-        const tagDropdownMenu = document.getElementById('tag-dropdown-menu');
-        const selectedTagsLabel = document.getElementById('selected-tags-label');
-        
-        // --- Persistence ---
-        function loadNotes() {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                let loaded = stored ? JSON.parse(stored) : defaultNotes;
-                return loaded.map(n => ({
-                    ...n,
-                    categories: Array.isArray(n.categories) ? n.categories : (n.category ? [n.category] : [])
-                }));
-            } catch (e) { return defaultNotes; }
-        }
-
-        function loadCategories() {
-            try {
-                const stored = localStorage.getItem(CAT_STORAGE_KEY);
-                return stored ? JSON.parse(stored) : defaultCategories;
-            } catch (e) { return defaultCategories; }
-        }
-
-        function saveNotes() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-        }
-
-        function saveCategories() {
-            localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(categories));
-        }
-
-        // --- UI Control ---
-        function setInputHeight(size) {
-            const btns = ['small', 'medium', 'large'];
-            btns.forEach(b => document.getElementById(`btn-h-${b}`).classList.remove('height-btn-active'));
-            input.classList.remove('h-32', 'h-64', 'h-96');
-            
-            document.getElementById(`btn-h-${size}`).classList.add('height-btn-active');
-            const hClass = size === 'small' ? 'h-32' : size === 'medium' ? 'h-64' : 'h-96';
-            input.classList.add(hClass);
-        }
-
-        function closeDropdowns(e) {
-            if (!e.target.closest('#tag-dropdown-container')) {
-                tagDropdownMenu.classList.add('hidden');
-            }
-        }
-
-        function toggleTagDropdown(e) {
-            e.stopPropagation();
-            tagDropdownMenu.classList.toggle('hidden');
-            renderTagDropdown();
-        }
-
-        function toggleInputTag(cat) {
-            if (selectedInputTags.includes(cat)) {
-                selectedInputTags = selectedInputTags.filter(t => t !== cat);
-            } else {
-                selectedInputTags.push(cat);
-            }
-            renderTagDropdown();
-            updateSelectedTagsLabel();
-        }
-
-        function updateSelectedTagsLabel() {
-            if (selectedInputTags.length === 0) {
-                selectedTagsLabel.innerText = "Select Tags";
-                selectedTagsLabel.className = "text-zinc-500";
-            } else if (selectedInputTags.length === 1) {
-                selectedTagsLabel.innerText = selectedInputTags[0];
-                selectedTagsLabel.className = "text-zinc-900 font-medium";
-            } else {
-                selectedTagsLabel.innerText = `${selectedInputTags.length} Tags`;
-                selectedTagsLabel.className = "text-zinc-900 font-medium";
-            }
-        }
-
-        function renderTagDropdown() {
-            tagDropdownMenu.innerHTML = '';
-            categories.forEach(cat => {
-                const isSelected = selectedInputTags.includes(cat);
-                const label = document.createElement('label');
-                label.className = "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-zinc-50 transition-colors select-none group";
-                label.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" onchange="toggleInputTag('${cat}')" class="tag-checkbox hidden" ${isSelected ? 'checked' : ''}>
-                        <div class="w-4 h-4 rounded border border-zinc-300 flex items-center justify-center text-xs group-hover:border-zinc-400 transition-colors">
-                            ${isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white"></i>' : ''}
-                        </div>
-                        <span class="text-xs font-medium ${isSelected ? 'text-zinc-900' : 'text-zinc-600'}">${cat}</span>
-                    </div>
-                `;
-                tagDropdownMenu.appendChild(label);
-            });
-            
-            const addDiv = document.createElement('div');
-            addDiv.className = "border-t border-zinc-100 mt-1 pt-1";
-            addDiv.innerHTML = `
-                <button onclick="document.getElementById('add-category-dialog').showModal()" class="w-full text-left px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1">
-                    <i data-lucide="plus" class="w-3 h-3"></i> Create "${categories.length > 0 ? '' : 'New'}"
-                </button>
-            `;
-            tagDropdownMenu.appendChild(addDiv);
-            
-            lucide.createIcons();
-        }
-
-        // --- Multi-Select Filter Rendering ---
-        function render() {
-            renderFilterBar();
-            renderNotes();
-            updateSelectedTagsLabel();
-            lucide.createIcons({ attrs: { 'stroke-width': '1.5' } });
-        }
-
-        function renderFilterBar() {
-            categoryFilterContainer.innerHTML = '';
-            
-            // 'All' Filter - Active if no specific filters are set
-            const isAllActive = activeFilters.length === 0;
-            const allBtn = document.createElement('button');
-            allBtn.onclick = () => toggleFilter('All');
-            allBtn.className = `px-4 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
-                isAllActive 
-                ? 'bg-zinc-900 border-zinc-900 text-white shadow-md' 
-                : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
-            }`;
-            allBtn.innerText = 'All';
-            categoryFilterContainer.appendChild(allBtn);
-
-            // Tags
-            categories.forEach(cat => {
-                const isActive = activeFilters.includes(cat);
-                const wrapper = document.createElement('div');
-                wrapper.className = `group/pill inline-flex items-center rounded-full border transition-all duration-200 cursor-pointer select-none ${
-                    isActive 
-                    ? 'bg-zinc-900 border-zinc-900 text-white shadow-md shadow-zinc-900/20' 
-                    : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
-                }`;
-                
-                const labelBtn = document.createElement('button');
-                labelBtn.onclick = () => toggleFilter(cat);
-                labelBtn.className = "px-3 py-1.5 text-xs font-medium bg-transparent focus:outline-none";
-                labelBtn.innerText = cat;
-                wrapper.appendChild(labelBtn);
-                
-                // Delete Button (X)
-                const deleteBtn = document.createElement('button');
-                deleteBtn.onclick = (e) => { e.stopPropagation(); deleteCategory(cat); };
-                deleteBtn.className = `pr-2 pl-1 py-1.5 flex items-center justify-center opacity-0 group-hover/pill:opacity-100 transition-opacity focus:outline-none ${isActive ? 'text-zinc-300 hover:text-white' : 'text-zinc-400 hover:text-red-500'}`;
-                deleteBtn.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
-                deleteBtn.title = "Delete Tag";
-                
-                if(window.innerWidth < 640 && isActive) deleteBtn.classList.remove('opacity-0');
-                
-                wrapper.appendChild(deleteBtn);
-                categoryFilterContainer.appendChild(wrapper);
-            });
-
-            // New Tag Button (+)
-            const addTagBtn = document.createElement('button');
-            addTagBtn.onclick = () => document.getElementById('add-category-dialog').showModal();
-            addTagBtn.className = "ml-1 w-7 h-7 flex items-center justify-center rounded-full border border-dashed border-zinc-300 text-zinc-400 hover:text-zinc-900 hover:border-zinc-400 hover:bg-white transition-all";
-            addTagBtn.title = "Create New Tag";
-            addTagBtn.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5"></i>';
-            categoryFilterContainer.appendChild(addTagBtn);
-        }
-
-        function renderNotes() {
-            container.innerHTML = '';
-            
-            // Logic: Show note if no filters active OR if note has ANY of the active filters
-            const filteredNotes = activeFilters.length === 0 
-                ? notes 
-                : notes.filter(n => n.categories.some(cat => activeFilters.includes(cat)));
-
-            countDisplay.innerText = filteredNotes.length;
-
-            if (filteredNotes.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-            } else {
-                emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
-            }
-
-            [...filteredNotes].reverse().forEach(note => {
-                const isLong = note.content.length > 150 || (note.content.match(/\n/g) || []).length > 3;
-                const colSpanClass = note.expanded ? 'col-span-1 sm:col-span-2 lg:col-span-3' : 'col-span-1';
-                
-                const tagsHtml = note.categories.map(cat => 
-                    `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-zinc-100 text-zinc-600 border border-zinc-200">${cat}</span>`
-                ).join('');
-
-                const card = document.createElement('div');
-                card.className = `group relative flex flex-col bg-white border border-zinc-200 rounded-xl p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 grid-item-transition ${colSpanClass} ${note.id === editingNoteId ? 'editing-mode ring-1 ring-emerald-200' : ''}`;
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="text-[10px] font-medium tracking-wide text-zinc-400 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">${note.date}</span>
-                        
-                        <div class="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
-                            <button onclick="copyToClipboard('${note.id}')" class="touch-target sm:touch-auto sm:p-1.5 flex items-center justify-center text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Copy">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="editNote(${note.id})" class="touch-target sm:touch-auto sm:p-1.5 flex items-center justify-center text-zinc-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
-                                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="deleteNote(${note.id})" class="touch-target sm:touch-auto sm:p-1.5 flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="relative w-full flex-grow mb-3">
-                        <p class="text-sm font-mono text-zinc-600 leading-relaxed whitespace-pre-wrap break-words ${note.expanded ? '' : 'text-clamped'} selection:bg-zinc-200" id="text-${note.id}">${escapeHtml(note.content)}</p>
-                        ${isLong && !note.expanded ? '<div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>' : ''}
-                    </div>
-
-                    <div class="mt-auto flex flex-col gap-3">
-                        ${note.categories.length > 0 ? `<div class="flex flex-wrap gap-1.5 w-full">${tagsHtml}</div>` : ''}
-                        
-                        ${isLong ? `
-                        <div class="flex items-center pt-1 border-t border-zinc-50 mt-1">
-                            <button onclick="toggleExpand(${note.id})" class="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none py-1 rounded-md">
-                                <span>${note.expanded ? 'Show less' : 'Show more'}</span>
-                                <i data-lucide="${note.expanded ? 'minimize-2' : 'chevron-down'}" class="w-3 h-3"></i>
-                            </button>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // --- Core Logic ---
-
-        // Multi-select Logic
-        function toggleFilter(category) {
-            if (category === 'All') {
-                activeFilters = []; // Reset to empty implies 'Show All'
-            } else {
-                if (activeFilters.includes(category)) {
-                    activeFilters = activeFilters.filter(c => c !== category);
-                } else {
-                    activeFilters.push(category);
-                }
-            }
-            render();
-        }
-
-        function confirmAddCategory() {
-            const inputVal = document.getElementById('new-category-input').value.trim();
-            if (inputVal && !categories.includes(inputVal)) {
-                categories.push(inputVal);
-                saveCategories();
-                render();
-                document.getElementById('new-category-input').value = '';
-                document.getElementById('add-category-dialog').close();
-                showToast(`Category "${inputVal}" added`);
-            }
-        }
-
-        function deleteCategory(catName) {
-            if (confirm(`Permanently delete tag "${catName}"? This will remove it from all notes.`)) {
-                // Remove from Master list
-                categories = categories.filter(c => c !== catName);
-                
-                // Remove from Active Filters
-                activeFilters = activeFilters.filter(c => c !== catName);
-                
-                // Remove from Input Selections
-                selectedInputTags = selectedInputTags.filter(c => c !== catName);
-                
-                // Remove from All Notes
-                notes.forEach(note => {
-                    note.categories = note.categories.filter(c => c !== catName);
-                });
-                
-                saveCategories();
-                saveNotes();
-                
-                render();
-                showToast(`Tag "${catName}" deleted`);
-            }
-        }
-
-        function addNote() {
-            const text = input.value.trim();
-            if (!text) return;
-
-            if (editingNoteId) {
-                const noteIndex = notes.findIndex(n => n.id === editingNoteId);
-                if (noteIndex > -1) {
-                    notes[noteIndex].content = text;
-                    notes[noteIndex].categories = [...selectedInputTags];
-                    notes[noteIndex].date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    notes[noteIndex].expanded = false;
-                    showToast('Note updated');
-                }
-                editingNoteId = null;
-                addUpdateText.innerText = 'Add Note';
-                inputContainer.classList.remove('editing-mode', 'ring-emerald-400/50');
-            } else {
-                const newNote = {
-                    id: Date.now(),
-                    content: text,
-                    categories: [...selectedInputTags],
-                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    expanded: false
-                };
-                notes.push(newNote);
-                showToast('Note added');
-            }
-
-            input.value = '';
-            selectedInputTags = [];
-            saveNotes();
-            render();
-        }
-
-        function editNote(id) {
-            const note = notes.find(n => n.id === id);
-            if (!note) return;
-            input.value = note.content;
-            selectedInputTags = [...note.categories];
-            editingNoteId = id;
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            input.focus();
-            addUpdateText.innerText = 'Update Note';
-            inputContainer.classList.add('editing-mode', 'ring-emerald-400/50');
-            render();
-        }
-
-        function deleteNote(id) {
-            const index = notes.findIndex(n => n.id === id);
-            if (index > -1) {
-                lastDeletedNote = notes[index];
-                lastDeletedIndex = index;
-                notes.splice(index, 1);
-                
-                if (editingNoteId === id) {
-                    editingNoteId = null;
-                    input.value = '';
-                    selectedInputTags = [];
-                    addUpdateText.innerText = 'Add Note';
-                    inputContainer.classList.remove('editing-mode');
-                }
-
-                saveNotes();
-                render();
-                showToast('Note deleted', true);
-            }
-        }
-
-        function undoAction() {
-            if (lastDeletedNote) {
-                if (lastDeletedIndex >= 0 && lastDeletedIndex <= notes.length) {
-                    notes.splice(lastDeletedIndex, 0, lastDeletedNote);
-                } else {
-                    notes.push(lastDeletedNote);
-                }
-                lastDeletedNote = null;
-                lastDeletedIndex = -1;
-                saveNotes();
-                render();
-                undoBtn.classList.add('hidden');
-                showToast('Action undone');
-            }
-        }
-
-        function toggleExpand(id) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                note.expanded = !note.expanded;
-                saveNotes();
-                render();
-            }
-        }
-
-        async function copyToClipboard(id) {
-            const note = notes.find(n => n.id == id);
-            if (!note) return;
-            try {
-                await navigator.clipboard.writeText(note.content);
-                showToast('Copied to clipboard');
-            } catch (err) {
-                const ta = document.createElement("textarea");
-                ta.value = note.content;
-                document.body.appendChild(ta); ta.select();
-                try { document.execCommand('copy'); showToast('Copied'); } catch (e) {}
-                document.body.removeChild(ta);
-            }
-        }
-
-        let toastTimeout;
-        function showToast(message, allowUndo = false) {
-            toastMsg.innerText = message;
-            const icon = document.getElementById('toast-icon');
-            
-            if (allowUndo) {
-                undoBtn.classList.remove('hidden');
-                icon.setAttribute('data-lucide', 'trash-2');
-            } else {
-                undoBtn.classList.add('hidden');
-                icon.setAttribute('data-lucide', 'check-circle-2');
-            }
-            lucide.createIcons();
-
-            toast.classList.remove('translate-y-32', 'opacity-0');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.add('translate-y-32', 'opacity-0');
-                setTimeout(() => undoBtn.classList.add('hidden'), 300);
-                lastDeletedNote = null;
-            }, 4000);
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/[&<>"']/g, function(m) { 
-                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]; 
-            });
-        }
-
-        render();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

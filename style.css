@@ -1,0 +1,209 @@
+/* Base Settings */
+:root {
+    --font-inter: 'Inter', sans-serif;
+}
+
+body {
+    font-family: var(--font-inter);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e4e4e7;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d4d4d8;
+}
+
+/* Text Clamping */
+.text-clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Animation Utilities */
+.focus-ring-anim {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.grid-item-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#input-text {
+    transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.editing-mode {
+    background-color: #f0fdf4 !important; /* bg-emerald-50 */
+    border-color: #d1fae5 !important; /* border-emerald-200 */
+}
+
+.height-btn-active {
+    background-color: #f4f4f5;
+    color: #18181b;
+    border-color: #e4e4e7;
+}
+
+/* Tag Styles */
+.tag-pill {
+    transition: all 0.2s;
+}
+
+.tag-checkbox:checked + div {
+    background-color: #18181b; /* zinc-900 */
+    color: white;
+    border-color: #18181b;
+}
+
+/* Mobile Safety */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Drag and Drop Styles */
+.draggable-tag {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.draggable-tag.dragging {
+    opacity: 0.5;
+}
+
+.draggable-tag:hover {
+    cursor: move;
+}
+
+/* Tag Search Dropdown Styles */
+#tag-search-dropdown {
+    animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 标签下拉菜单响应式优化 */
+#tag-dropdown-menu {
+    /* 确保在小屏幕上不会超出边界 */
+    box-sizing: border-box;
+    /* 响应式宽度约束：小屏幕下不超过视口宽度减去边距 */
+    max-width: calc(100vw - 2rem) !important;
+    /* 确保在小屏幕上可以正常显示 */
+    min-width: 0;
+}
+
+/* 小屏幕下的响应式调整 */
+@media (max-width: 640px) {
+    #tag-dropdown-menu {
+        /* 在小屏幕上使用全宽（减去边距） */
+        width: calc(100vw - 2rem) !important;
+        max-width: calc(100vw - 2rem) !important;
+        /* 确保左右有边距，不会贴边 */
+        left: 1rem !important;
+        right: auto !important;
+        /* 如果按钮在右侧，则右对齐 */
+    }
+    
+    /* 确保在小屏幕上左右两列能够正常滚动 */
+    #tag-dropdown-parent-list,
+    #tag-dropdown-child-list {
+        /* 确保列宽度不会硬撑开容器 */
+        min-width: 0;
+        flex-shrink: 1;
+        /* 确保内容可以滚动 */
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
+
+/* 中等屏幕下的调整 */
+@media (min-width: 641px) and (max-width: 768px) {
+    #tag-dropdown-menu {
+        /* 中等屏幕下限制最大宽度 */
+        max-width: calc(100vw - 2rem) !important;
+    }
+}
+
+/* 确保父子列表能够正常滚动和分配空间 */
+#tag-dropdown-parent-list,
+#tag-dropdown-child-list {
+    /* 确保滚动条可见且可用 */
+    scrollbar-width: thin;
+    scrollbar-color: #e4e4e7 transparent;
+    /* 确保列宽度不会硬撑开容器 */
+    min-width: 0;
+    flex-shrink: 1;
+    /* 确保内容可以滚动 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* 防止内容溢出 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Webkit 浏览器滚动条样式 */
+#tag-dropdown-parent-list::-webkit-scrollbar,
+#tag-dropdown-child-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#tag-dropdown-parent-list::-webkit-scrollbar-track,
+#tag-dropdown-child-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#tag-dropdown-parent-list::-webkit-scrollbar-thumb,
+#tag-dropdown-child-list::-webkit-scrollbar-thumb {
+    background: #e4e4e7;
+    border-radius: 3px;
+}
+
+#tag-dropdown-parent-list::-webkit-scrollbar-thumb:hover,
+#tag-dropdown-child-list::-webkit-scrollbar-thumb:hover {
+    background: #d4d4d8;
+}
+
+/* 确保下拉菜单内的标签项不会溢出 */
+#tag-dropdown-parent-list label,
+#tag-dropdown-child-list label {
+    /* 防止文本溢出 */
+    min-width: 0;
+    flex-shrink: 1;
+    /* 确保文本可以换行或截断 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 确保下拉菜单容器能够正确计算位置 */
+#tag-dropdown-container {
+    position: relative;
+    /* 确保容器不会影响定位 */
+    z-index: 50;
+}
+
