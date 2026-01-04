@@ -9,6 +9,13 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* 🔥 重构：为所有 Lucide 图标（SVG）添加 pointer-events: none，确保点击事件穿透到父级功能元素 */
+svg[data-lucide],
+i[data-lucide] svg,
+svg[data-lucide] * {
+    pointer-events: none;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
@@ -205,5 +212,28 @@ body {
     position: relative;
     /* 确保容器不会影响定位 */
     z-index: 50;
+}
+
+/* 项目管理界面动画效果 */
+.fade-enter {
+    opacity: 0;
+    transform: scale(0.98);
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+.fade-exit {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
 }
 
