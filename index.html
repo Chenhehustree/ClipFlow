@@ -301,14 +301,25 @@
         </button>
     </div>
 
-    <!-- 模块化脚本引入（按依赖顺序） -->
-    <script src="js/config.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/state.js"></script>
-    <script src="js/ui-render.js"></script>
-    <script src="js/actions.js"></script>
-    <script src="js/events.js"></script>
-    <script src="js/project.js"></script>
-    <script src="js/main.js"></script>
+    <!-- 模块化脚本引入（按依赖顺序，使用 defer 确保 DOM 加载完成后按顺序执行） -->
+    <!-- 
+        依赖关系说明：
+        1. config.js - 基础常量和工具函数，无依赖
+        2. storage.js - 依赖 config.js (getStorageKey, getCatStorageKey, defaultNotes, defaultCategories)
+        3. state.js - 依赖 storage.js (Storage)
+        4. ui-render.js - 依赖 state.js (State, UndoManager, Utils, Render, Toast, Modal)
+        5. actions.js - 依赖 state.js, ui-render.js (State, Render, UndoManager, Toast)
+        6. events.js - 依赖 state.js, ui-render.js, actions.js (State, Render, Actions)
+        7. project.js - 依赖 state.js, storage.js, ui-render.js, config.js (State, Storage, Render, getStorageKey, getCatStorageKey)
+        8. main.js - 依赖 state.js, project.js (State, ProjectManager)，内部使用 Render, Events
+    -->
+    <script src="js/config.js" defer></script>
+    <script src="js/storage.js" defer></script>
+    <script src="js/state.js" defer></script>
+    <script src="js/ui-render.js" defer></script>
+    <script src="js/actions.js" defer></script>
+    <script src="js/events.js" defer></script>
+    <script src="js/project.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>
